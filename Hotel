@@ -1,0 +1,60 @@
+def guest_in_room(room, guest):
+    for g in room.guests:
+        if g.casefold() == guest.casefold():
+            return True
+    return False
+
+
+class Hotel:
+    def __init__(self, name, rooms):
+        self.name = name
+        self.rooms = rooms
+        self.budget_rooms = 0
+        self.legacy_rooms = 0
+        for room in rooms:
+            if isinstance(room, LegacyRoom):
+                self.legacy_rooms += 1
+            if isinstance(room, BudgetRoom):
+                self.budget_rooms += 1
+
+    def __repr__(self):
+        return f"{self.name} hotel has:\n{self.budget_rooms} BudgetRooms\n{self.legacy_rooms} LegacyRooms\n" + \
+               str(len(self.rooms) - self.legacy_rooms - self.budget_rooms) + " other room types\n" + \
+               str(self.occupied_rooms()) + " occupied rooms"
+
+    def occupied_rooms(self):
+        occupied_rooms = 0
+        for room in self.rooms:
+            if room.is_occupied():
+                occupied_rooms += 1
+        return occupied_rooms
+
+    def check_in(self, guests, rank):
+        for room in self.rooms:
+            if room.rank == rank and not room.is_occupied():
+                room.check_in(guests)
+                return room
+        return None
+
+    def check_out(self, guest):
+        for room in self.rooms:
+            if guest_in_room(room, guest):
+                room.check_out()
+                return room
+        return None
+
+    def vacant_rooms(self):
+        vacant_rooms = []
+        for room in self.rooms:
+            if not room.is_occupied():
+                vacant_rooms.append(room)
+        return vacant_rooms
+
+    def upgrade(self, guest):
+        for room in self.rooms:
+            if guest_in_room(room, guest):
+                for btr_room in self.vacant_rooms():
+                    if btr_room.better_than(room):
+                        room.move_to(btr_room)
+                        return btr_room
+        return None
