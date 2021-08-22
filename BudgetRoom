@@ -34,29 +34,3 @@ class BudgetRoom(Room):
             raise RoomError('Cannot grant an empty room')
         self.satisfaction = min(5, self.satisfaction + 0.8)
         self.clean_level = max(1, self.clean_level - 1)
-
-
-class LegacyRoom(Room):
-    def __init__(self, floor, number, guests, clean_level, \
-                 rank=2, satisfaction=1.0, \
-                 minibar_drinks=2, minibar_snacks=2):
-        super().__init__(floor, number, guests, clean_level, rank, satisfaction)
-        self.minibar_drinks = minibar_drinks
-        self.minibar_snacks = minibar_snacks
-
-    def __repr__(self):
-        return super().__repr__() + f"\ntype: LegacyRoom \nminibar_drinks: {self.minibar_drinks}\nminibar_snacks: {self.minibar_snacks}"
-
-    def check_in(self, guests):
-        super().check_in(guests)
-        self.minibar_snacks = 2
-        self.minibar_drinks = 2
-
-    def add_drinks(self, quantity):
-        self.minibar_drinks += quantity
-        self.satisfaction = min(5.0, self.satisfaction + 0.2 * quantity)
-
-    def add_snacks(self, quantity):
-        self.minibar_snacks += quantity
-        self.satisfaction = min(5.0, self.satisfaction + 0.3 * quantity)
-        self.clean_level = max(1, self.clean_level - 1)
