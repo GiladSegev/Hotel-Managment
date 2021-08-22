@@ -1,0 +1,75 @@
+class Room:
+    def __init__(self, floor, number, guests, clean_level, rank, satisfaction=1.0):
+        self.floor = floor
+        self.number = number
+        if guests != []:
+            for i in range(len(guests)):
+                guests[i] = guests[i].lower()
+        self.guests = guests
+        if not isinstance(clean_level, int):
+            raise ValueError("Clean level must be an integer number")
+        if clean_level > 10 or clean_level < 1:
+            raise ValueError("Clean level must be a number between 1-10")
+        self.clean_level = clean_level
+        if not isinstance(rank, int):
+            raise TypeError("Rank must be an integer number")
+        if rank < 1 or rank > 3:
+            raise ValueError("Rank must be a number between 1-3")
+        self.rank = rank
+        if not isinstance(satisfaction, int) and not isinstance(satisfaction, float):
+            raise TypeError("Satisfaction must be an integer or a float")
+        if satisfaction < 1 or satisfaction > 5:
+            raise ValueError("Satisfaction must be a number between 1-5")
+        self.satisfaction = float(satisfaction)
+
+    def __repr__(self):
+        guests_names = ''
+        if self.guests != []:
+            for name in self.guests:
+                guests_names += name + ', '
+            guests_names = guests_names[:-2]
+        else:
+            guests_names = 'empty'
+        return f"floor: {self.floor}\nnumber: {self.number}\nguests: {guests_names}\n" \
+               f"clean_Level: {self.clean_level}\nrank: {self.rank}\nsatisfaction: {round(self.satisfaction, 1)} "
+
+    def is_occupied(self):
+        return self.guests != []
+
+    def can_clean(self):
+        return True
+
+    def clean(self):
+        if self.can_clean():
+            self.clean_level = min(10, self.rank + self.clean_level)
+        else:
+            raise RoomError('Room cannot be cleaned')
+
+    def better_than(self, other):
+        if not isinstance(other, Room):
+            raise TypeError("Other mus't be an instance of Room")
+        return (self.rank, self.floor, self.clean_level) > (other.rank, other.floor, other.clean_level)
+
+    def check_in(self, guests):
+        if self.is_occupied():
+            raise RoomError("Cannot check-in new guests to an occupied room")
+        guests = (guest.lower() for guest in guests)
+        self.guests = guests
+        self.satisfaction = 1
+
+    def check_out(self):
+        if not self.is_occupied():
+            raise RoomError('Cannot check-out an empty room')
+        self.guests = []
+
+    def move_to(self, other):
+        if not self.is_occupied():
+            raise RoomError('Cannot move guests from an empty room')
+        if other.is_occupied():
+            raise RoomError('Cannot move guests to an occupied room')
+        other.guests = self.guests
+        if other.better_than(self):
+            other.satisfaction = min(5.0, self.satisfaction + 1.0)
+        else:
+            other.satisfaction = self.satisfaction
+        self.guests = []
